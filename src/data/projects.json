@@ -1,0 +1,26 @@
+[
+  {
+    "slug": "dune-imperium",
+    "name": "Dune Imperium",
+    "period": "Sep 2026 - Present",
+    "summary": "3–4 player multiplayer board game with server-driven state synchronization across connected clients.",
+    "stack": ["React", "TypeScript", "Fastify", "WebSockets"],
+    "highlights": [
+      "Built a 3–4 player multiplayer board game with server-driven state synchronization across connected clients",
+      "Developed a server-authoritative rules engine to validate actions and manage game progression and resources"
+    ],
+    "links": []
+  },
+  {
+    "slug": "anteater",
+    "name": "Anteater",
+    "period": "Jul 2026 - Aug 2026",
+    "summary": "Offline-first RAG pipeline for Canadian student loan information with a static vector index.",
+    "stack": ["RAG", "WebLLM", "WebGPU"],
+    "highlights": [
+      "Built an offline-first RAG pipeline for Canadian student loan information, crawling and cleaning government content, generating overlapping sentence-aligned chunks, and producing a static vector index",
+      "Configured resource-aware model deployment with WebGPU checks, ensuring safe fallback without WebLLM"
+    ],
+    "links": []
+  }
+]

@@ -1,0 +1,14 @@
+[
+  {
+    "group": "Languages",
+    "items": ["TypeScript", "Python", "C++", "C#", "JavaScript", "HTML/CSS", "SQL"]
+  },
+  {
+    "group": "Frameworks",
+    "items": ["React", "Node.js", "Nest.js", "GraphQL", "REST APIs", ".NET", "Flask", "Three.js", "NoSQL", "Sass"]
+  },
+  {
+    "group": "Tools",
+    "items": ["Agile", "Claude", "Git", "Docker", "AWS", "Jira", "Ubuntu", "Terraform", "CloudWatch"]
+  }
+]

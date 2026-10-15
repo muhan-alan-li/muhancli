@@ -1,0 +1,46 @@
+[
+  {
+    "id": "apera-ai",
+    "company": "Apera AI",
+    "role": "Software Engineer Intern",
+    "location": "Vancouver, BC",
+    "start": "Sep 2025",
+    "end": "Apr 2026",
+    "bullets": [
+      "Shipped self-serve asset deployment with live status tracking (REST API, React/TypeScript), replacing a manual support-ticket workflow and cutting deployment time from ~12hrs to ~5min",
+      "Extended Python/Redis DAG job scheduler with containerized execution and job caching, isolating deployment jobs and preventing redundant runs",
+      "Added support for a new robot class, modeling joint limits and bin-picking behavior, enabling sales teams to validate product fit for prospective customers through simulation of production environment",
+      "Implemented cross-user content sharing with recursive object copying and DynamoDB transactional writes, preserving nested object relationships and preventing dangling-reference failures",
+      "Built continuous collision detection using spatial hashing in Three.js, maintaining 60+ FPS through memoization"
+    ],
+    "tags": ["TypeScript", "React", "REST", "Python", "Redis", "DynamoDB", "Three.js", "Docker"]
+  },
+  {
+    "id": "nrcan",
+    "company": "Natural Resources Canada",
+    "role": "Software Developer Co-op",
+    "location": "Vancouver, BC",
+    "start": "May 2025",
+    "end": "Aug 2025",
+    "bullets": [
+      "Ported the ANSE simulation engine from Windows-only .NET to a cross-platform C# runtime, replacing incompatible dependencies and refactoring platform-specific code to support Linux and macOS",
+      "Shipped a C# transformation library that normalized multiple inconsistent Excel schemas into ANSE's engine-specific text format, centralizing format-specific conversion logic",
+      "Automated ANSE build and deployment with GitHub CI/CD and containerized environments with Docker"
+    ],
+    "tags": ["C#", ".NET", "Docker", "GitHub Actions"]
+  },
+  {
+    "id": "ubc-cic",
+    "company": "UBC Cloud Innovation Center",
+    "role": "Software Developer Co-op",
+    "location": "Vancouver, BC",
+    "start": "Jan 2023",
+    "end": "Aug 2023",
+    "bullets": [
+      "Delivered two full-stack AWS applications end-to-end for internal and external clients, translating requirements into serverless architectures, implementation plans, and deployed software",
+      "Built a video-processing pipeline with Kinesis Video Streams, Rekognition, and Lambda for facial anonymization",
+      "Shipped an anonymous drug-checking platform with React and AWS CDK, using Cognito, DynamoDB, API Gateway, and JWT-based authorization for anonymous and admin workflows"
+    ],
+    "tags": ["AWS", "React", "AWS CDK", "Lambda", "DynamoDB", "Cognito", "API Gateway"]
+  }
+]

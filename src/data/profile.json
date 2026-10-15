@@ -1,0 +1,21 @@
+{
+  "name": "Muhan Li",
+  "tagline": "Computer Engineering @ UBC — Full-Stack Software Engineer",
+  "location": "Vancouver, BC",
+  "phone": "778-680-8519",
+  "email": "muhanli.work@gmail.com",
+  "links": [
+    { "label": "GitHub", "url": "https://github.com/muhan-alan-li" },
+    { "label": "LinkedIn", "url": "https://linkedin.com/in/muhan-li" }
+  ],
+  "education": [
+    {
+      "school": "University of British Columbia",
+      "degree": "BASc. Computer Engineering",
+      "location": "Vancouver, BC",
+      "start": "Sep 2020",
+      "end": "May 2026",
+      "detail": "GPA: 3.8"
+    }
+  ]
+}
