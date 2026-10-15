@@ -90,6 +90,20 @@ jobs:
         env:
           MUHAN_TEST_BINARY: target/${{ matrix.target }}/release/muhan
         run: python tests/install_unix.py
+      - name: Install completion test shells on Linux
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y zsh fish
+      - name: Install completion test shells on macOS
+        if: matrix.platform == 'macos'
+        run: brew list fish >/dev/null 2>&1 || brew install fish
+      - name: Test Bash, Zsh, and Fish completion
+        if: matrix.platform != 'windows'
+        run: >-
+          python tests/completion_shells.py
+          --binary target/${{ matrix.target }}/release/muhan
+          --shell bash --shell zsh --shell fish
       - name: Package Windows binary
         if: matrix.platform == 'windows'
         run: >-

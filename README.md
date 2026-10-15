@@ -196,8 +196,16 @@ cargo clippy --locked --all-targets -- -D warnings
 cargo test --locked
 cargo build --locked --release
 python3 tests/install_unix.py
+# Requires bash, zsh, and fish on PATH:
+python3 tests/completion_shells.py --shell bash --shell zsh --shell fish
 ```
 
 Installer tests simulate release downloads locally and execute the installed
 binary. Windows CI runs `tests/install_windows.ps1` under both Windows PowerShell
 5.1 and PowerShell 7 against the packaged Windows build.
+
+Completion checks send real Tab keystrokes to Bash and Zsh in isolated terminals,
+use Fish's `complete -C`, and use PowerShell's `TabExpansion2`. CI runs them on
+both architectures for each supported OS, including macOS's bundled Bash 3.2.
+They cover commands, flags, portfolio values, and a working directory containing
+decoy files to catch unintended filename suggestions.
