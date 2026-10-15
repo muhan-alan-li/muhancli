@@ -3,6 +3,11 @@ use muhancli::render;
 use muhancli::{Cli, Commands, OutputOpts, Portfolio};
 
 fn main() {
+    clap_complete::env::CompleteEnv::with_factory(|| {
+        muhancli::completions::command(&Portfolio::load())
+    })
+    .var("MUHAN_COMPLETE")
+    .complete();
     let args = Cli::parse();
     let opts = OutputOpts {
         json: args.json,
@@ -11,6 +16,16 @@ fn main() {
     let portfolio = Portfolio::load();
     let show_intro = args.command.is_none() && !args.json;
     let command = args.command.unwrap_or(Commands::About);
+
+    if let Commands::Completions { shell } = command {
+        muhancli::completions::write_registration(shell, &mut std::io::stdout()).unwrap_or_else(
+            |error| {
+                eprintln!("error: could not write completions: {error}");
+                std::process::exit(1);
+            },
+        );
+        return;
+    }
 
     let output = match &command {
         Commands::About => render::render_about(&portfolio, opts),
@@ -79,6 +94,7 @@ fn main() {
         },
         Commands::Contact => render::render_contact(&portfolio, opts),
         Commands::Version => render::render_version(),
+        Commands::Completions { .. } => unreachable!("completions were handled above"),
     };
 
     println!("{output}");

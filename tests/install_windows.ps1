@@ -60,6 +60,18 @@ try {
     Assert ($LASTEXITCODE -eq 0 -and $about.name) 'Installed CLI must run'
     Assert (($env:Path -split ';') -contains $destination) 'Current session PATH must include install directory'
     Assert (([Environment]::GetEnvironmentVariable('Path', 'User') -split ';') -contains $destination) 'User PATH must include install directory'
+    # Exercise PowerShell's actual Tab expansion API with the generated adapter.
+    & $exe completions powershell | Out-String | Invoke-Expression
+    foreach ($case in @(
+        @{ Line = 'muhan exp'; Expected = 'experience' },
+        @{ Line = 'muhan experience ap'; Expected = 'apera-ai' },
+        @{ Line = 'muhan projects dune'; Expected = 'dune-imperium' },
+        @{ Line = 'muhan projects --tag Re'; Expected = 'React' },
+        @{ Line = 'muhan skills --group Lang'; Expected = 'Languages' }
+    )) {
+        $matches = (TabExpansion2 $case.Line $case.Line.Length).CompletionMatches.CompletionText
+        Assert ($matches -contains $case.Expected) "Completion failed for: $($case.Line)"
+    }
     Assert ($mockState.Requests -contains "https://github.com/muhan-alan-li/muhancli/releases/download/v0.1.0/muhan-windows-$arch.zip") 'Latest must resolve to a pinned release'
 
     $mockState.Requests.Clear()

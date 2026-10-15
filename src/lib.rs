@@ -1,4 +1,5 @@
 pub mod cli;
+pub mod completions;
 pub mod data;
 pub mod render;
 

@@ -47,6 +47,12 @@ pub enum Commands {
     },
     /// Show contact info.
     Contact,
+    /// Generate a shell completion script (see README for setup).
+    Completions {
+        /// Shell that will load the generated script.
+        #[arg(value_enum)]
+        shell: clap_complete::Shell,
+    },
     /// Show version, git sha, and build date.
     Version,
 }

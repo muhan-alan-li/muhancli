@@ -100,6 +100,50 @@ muhan --json experience
 muhan --plain projects
 ```
 
+## Tab completion
+
+Completion is available for Bash, Zsh, Fish, PowerShell, and Elvish. It suggests
+commands, flags, experience IDs, project slugs, project stack tags, and skill
+groups. For example, type `muhan experience ap` then press Tab to get `apera-ai`.
+Suggestions come from the installed binary and work offline.
+
+Enable it in your current shell after putting `muhan` on PATH:
+
+```bash
+# Bash (including macOS's bundled Bash 3.2)
+eval "$(muhan completions bash)"
+```
+
+```zsh
+# Zsh: initialize completion first if your shell setup hasn't already done so.
+autoload -Uz compinit
+compinit
+eval "$(muhan completions zsh)"
+```
+
+```fish
+# Fish
+muhan completions fish | source
+```
+
+```powershell
+# Windows PowerShell 5.1 or PowerShell 7
+muhan completions powershell | Out-String | Invoke-Expression
+```
+
+For future sessions, add the corresponding activation line after your PATH setup
+in `~/.bashrc`, `${ZDOTDIR:-$HOME}/.zshrc`, `~/.config/fish/config.fish` (or your
+Fish config under `XDG_CONFIG_HOME`), or the PowerShell `$PROFILE` file. In Zsh,
+place it after `compinit`. Bash login shells should load `~/.bashrc` from their
+login profile. PowerShell profiles are specific to each host, so configure both
+Windows PowerShell and PowerShell 7 if you use both. The installers configure
+PATH; completion activation is a separate, one-time setup.
+
+Generate the adapter on each shell startup as shown above, so updates refresh
+both the adapter and the suggestions. To remove completion, delete its activation
+line and start a new shell. Elvish users can add
+`eval (muhan completions elvish | slurp)` to their shell config.
+
 ## Update or uninstall
 
 Run the same installer again to update to the latest release. Installed versions
