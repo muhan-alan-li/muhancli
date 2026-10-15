@@ -48,15 +48,30 @@ else
   echo "need curl or wget" >&2; exit 1
 fi
 
-# Verify checksum when available (warn-only if sums file missing).
-if command -v shasum >/dev/null 2>&1 || command -v sha256sum >/dev/null 2>&1; then
-  if curl -fsSL -o "$TMP/checksum" "$SUM_URL" 2>/dev/null; then
-    ( cd "$TMP" && mv muhan.tar.gz muhan-pkg.tar.gz 2>/dev/null || true )
-    echo "checksum download ok (verify manually if needed)"
-    ( cd "$TMP" && mv muhan-pkg.tar.gz muhan.tar.gz 2>/dev/null || true )
+# Verify checksum when available (fail closed on mismatch).
+if command -v sha256sum >/dev/null 2>&1; then
+  _sum="sha256sum"
+elif command -v shasum >/dev/null 2>&1; then
+  _sum="shasum -a 256"
+else
+  _sum=""
+fi
+
+if [ -n "${_sum:-}" ]; then
+  if curl -fsSL -o "$TMP/expected.sha256" "$SUM_URL" 2>/dev/null; then
+    # Expected file format: "<sha>  <filename>"
+    _want="$(awk '{print $1}' "$TMP/expected.sha256")"
+    _got="$($_sum "$TMP/muhan.tar.gz" | awk '{print $1}')"
+    if [ "$_want" != "$_got" ]; then
+      echo "checksum mismatch! expected $_want, got $_got" >&2
+      exit 1
+    fi
+    echo "Checksum OK."
   else
     echo "warning: no checksum file at $SUM_URL, skipping verification" >&2
   fi
+else
+  echo "warning: no sha256 tool found, skipping verification" >&2
 fi
 
 tar -xzf "$TMP/muhan.tar.gz" -C "$TMP"
