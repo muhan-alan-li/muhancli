@@ -1,0 +1,79 @@
+[
+  {
+    "slug": "dune-imperium",
+    "name": "Dune Imperium",
+    "period": "Sep 2026 - Present",
+    "summary": "3–4 player multiplayer board game with server-driven state synchronization across connected clients.",
+    "stack": ["React", "TypeScript", "Fastify", "WebSockets"],
+    "highlights": [
+      "Built a 3–4 player multiplayer board game with server-driven state synchronization across connected clients",
+      "Developed a server-authoritative rules engine to validate actions and manage game progression and resources"
+    ],
+    "links": [{ "label": "GitHub", "url": "https://github.com/muhan-alan-li/dune" }]
+  },
+  {
+    "slug": "anteater",
+    "name": "Anteater",
+    "period": "Jul 2026 - Aug 2026",
+    "summary": "Offline-first RAG pipeline for Canadian student loan information with a static vector index.",
+    "stack": ["RAG", "WebLLM", "WebGPU"],
+    "highlights": [
+      "Built an offline-first RAG pipeline for Canadian student loan information, crawling and cleaning government content, generating overlapping sentence-aligned chunks, and producing a static vector index",
+      "Configured resource-aware model deployment with WebGPU checks, ensuring safe fallback without WebLLM"
+    ],
+    "links": [{ "label": "GitHub", "url": "https://github.com/muhan-alan-li/anteater" }]
+  },
+  {
+    "slug": "election-guides",
+    "name": "Election Guides",
+    "period": "Oct 2026 - Present",
+    "summary": "Civic election guides: Vancouver 2026 municipal (130 candidates, static site), Richmond (full-stack), and BC (research pipeline).",
+    "stack": ["TypeScript", "Preact", "Go", "Python"],
+    "highlights": [
+      "Built a static TypeScript + Preact guide to Vancouver's October 2026 municipal election covering all 130 candidates with slate platforms and per-candidate analysis",
+      "Built a Richmond guide with Preact client, Go content server, and offline Python ingestion pipeline",
+      "Built a BC guide with sourced voting-index entries and disclosure documents, backed by a Go and Node research workflow"
+    ],
+    "links": [
+      { "label": "GitHub (Vancouver)", "url": "https://github.com/muhan-alan-li/van-election" },
+      { "label": "GitHub (Richmond)", "url": "https://github.com/muhan-alan-li/rmd-election" },
+      { "label": "GitHub (BC)", "url": "https://github.com/muhan-alan-li/bc-election" }
+    ]
+  },
+  {
+    "slug": "ultimeter",
+    "name": "Ulti Stats",
+    "period": "Aug 2026 - Present",
+    "summary": "Ultimate frisbee stat-taking iOS app tracking teams, players, games, and points.",
+    "stack": ["Swift", "SwiftUI", "SwiftData"],
+    "highlights": [
+      "Ultimate frisbee stat tracker for iOS covering teams, players, games, and points",
+      "Strict MVVM with SwiftData persistence: views hold no rules, view models own every decision, one atomic write per repository action"
+    ],
+    "links": [{ "label": "GitHub", "url": "https://github.com/muhan-alan-li/ultimeter" }]
+  },
+  {
+    "slug": "kangaroo",
+    "name": "Kangaroo",
+    "period": "Oct 2026 - Present",
+    "summary": "Personal job-search operations system: posting scanner, web dashboard, and containerized scheduled runs.",
+    "stack": ["Python", "JavaScript", "Docker", "systemd"],
+    "highlights": [
+      "Job search and application workflow for new-grad roles with the candidate profile as the single source of truth for every application field",
+      "Python server with web dashboard (postings table, scan-cost and board-health views) deployed via Docker and systemd"
+    ],
+    "links": [{ "label": "GitHub", "url": "https://github.com/muhan-alan-li/kangaroo" }]
+  },
+  {
+    "slug": "muhancli",
+    "name": "muhan",
+    "period": "Oct 2026 - Present",
+    "summary": "This portfolio as a terminal CLI: embedded data, pipeable JSON output, one-liner install.",
+    "stack": ["Rust", "clap", "serde"],
+    "highlights": [
+      "Portfolio CLI in Rust with subcommands for experience, projects, skills, and contact",
+      "Fully embedded data with stable --json output, --plain mode, and version metadata via build.rs"
+    ],
+    "links": []
+  }
+]
