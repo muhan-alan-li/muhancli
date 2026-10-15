@@ -125,7 +125,7 @@ if [ "${NO_MODIFY_PATH:-0}" != 1 ] && [ "${NO_MODIFY_COMPLETIONS:-0}" != 1 ]; th
     COMPLETION_LINE=
     case "${SHELL:-}" in
         */bash)
-            COMPLETION_LINE="if [ -x '$QUOTED_DEST/muhan' ]; then eval \"\$('$QUOTED_DEST/muhan' completions bash)\"; fi"
+            COMPLETION_LINE="if [ -n \"\${BASH_VERSION:-}\" ] && [ -x '$QUOTED_DEST/muhan' ]; then eval \"\$('$QUOTED_DEST/muhan' completions bash)\"; fi"
             ;;
         */zsh)
             COMPLETION_LINE="if [ -x '$QUOTED_DEST/muhan' ]; then if ! command -v compdef >/dev/null 2>&1; then autoload -Uz compinit; compinit -i; fi; eval \"\$('$QUOTED_DEST/muhan' completions zsh)\"; fi"

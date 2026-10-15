@@ -127,7 +127,9 @@ else:
         self.assertIsNotNone(fish, "Install fish to test installer activation")
         result = subprocess.check_output(
             [fish, "--no-config", "-c", 'source "$argv[1]"; complete -C "muhan experience ap"', str(profile)],
-            env=self.env, text=True)
+            # fish_add_path uses system utilities that our download-mocking
+            # PATH intentionally excludes during installation.
+            env=dict(self.env, PATH=self.env["PATH"] + os.pathsep + os.defpath), text=True)
         self.assertIn("apera-ai", result)
 
     def test_no_modify_completions(self):
