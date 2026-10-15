@@ -135,7 +135,7 @@ if [ "${NO_MODIFY_PATH:-0}" != 1 ] && [ "${NO_MODIFY_COMPLETIONS:-0}" != 1 ]; th
             mkdir -p "$FISH_DIR"
             # Fish escapes quotes with backslashes rather than POSIX quote joining.
             FISH_DEST=$(printf '%s' "$DEST" | sed "s/\\\\/\\\\\\\\/g; s/'/\\\\'/g")
-            printf "# muhan portfolio CLI\nif test -x '%s/muhan'\n    fish_add_path '%s'\n    '%s/muhan' completions fish | source\nend\n" "$FISH_DEST" "$FISH_DEST" "$FISH_DEST" > "$FISH_DIR/muhan.fish"
+            printf "# muhan portfolio CLI\nif test -x '%s/muhan'\n    fish_add_path --path '%s'\n    '%s/muhan' completions fish | source\nend\n" "$FISH_DEST" "$FISH_DEST" "$FISH_DEST" > "$FISH_DIR/muhan.fish"
             printf 'Enabled completion in %s/muhan.fish\n' "$FISH_DIR"
             ;;
     esac
