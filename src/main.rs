@@ -9,8 +9,10 @@ fn main() {
         plain: args.plain,
     };
     let portfolio = Portfolio::load();
+    let show_intro = args.command.is_none() && !args.json;
+    let command = args.command.unwrap_or(Commands::About);
 
-    let output = match &args.command {
+    let output = match &command {
         Commands::About => render::render_about(&portfolio, opts),
         Commands::Experience { id } => match id {
             None => render::render_experience_list(&portfolio, opts),
@@ -80,4 +82,8 @@ fn main() {
     };
 
     println!("{output}");
+    if show_intro {
+        println!("\nExplore: muhan experience | muhan projects | muhan skills | muhan contact");
+        println!("All commands: muhan --help");
+    }
 }

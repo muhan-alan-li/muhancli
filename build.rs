@@ -15,9 +15,22 @@ fn main() {
         .filter(|s| !s.is_empty())
         .unwrap_or_else(|| "unknown".to_string());
 
-    // UTC date, no extra deps. `date -u` on macOS/Linux.
-    let date = Command::new("date")
-        .args(["-u", "+%Y-%m-%d"])
+    // Windows' date command does not support the Unix flags.
+    let mut date_command = if cfg!(windows) {
+        let mut command = Command::new("powershell.exe");
+        command.args([
+            "-NoProfile",
+            "-NonInteractive",
+            "-Command",
+            "[DateTime]::UtcNow.ToString('yyyy-MM-dd')",
+        ]);
+        command
+    } else {
+        let mut command = Command::new("date");
+        command.args(["-u", "+%Y-%m-%d"]);
+        command
+    };
+    let date = date_command
         .output()
         .ok()
         .filter(|o| o.status.success())

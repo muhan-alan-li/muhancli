@@ -1,0 +1,130 @@
+name: Build, test, and release
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: ${{ matrix.platform }} / ${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux
+            arch: x86_64
+            runner: ubuntu-22.04
+            target: x86_64-unknown-linux-musl
+          - platform: linux
+            arch: aarch64
+            runner: ubuntu-24.04-arm
+            target: aarch64-unknown-linux-musl
+          - platform: macos
+            arch: x86_64
+            runner: macos-15-intel
+            target: x86_64-apple-darwin
+          - platform: macos
+            arch: aarch64
+            runner: macos-15
+            target: aarch64-apple-darwin
+          - platform: windows
+            arch: x86_64
+            runner: windows-2025
+            target: x86_64-pc-windows-msvc
+          - platform: windows
+            arch: aarch64
+            runner: windows-11-arm
+            target: aarch64-pc-windows-msvc
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+          components: rustfmt, clippy
+      - name: Set compatibility options
+        run: |
+          if [[ '${{ matrix.platform }}' == windows ]]; then
+            echo 'RUSTFLAGS=-C target-feature=+crt-static' >> "$GITHUB_ENV"
+          elif [[ '${{ matrix.platform }}' == macos ]]; then
+            echo 'MACOSX_DEPLOYMENT_TARGET=11.0' >> "$GITHUB_ENV"
+          fi
+      - name: Install musl linker
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y musl-tools
+          echo 'CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER=musl-gcc' >> "$GITHUB_ENV"
+          echo 'CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER=musl-gcc' >> "$GITHUB_ENV"
+      - name: Verify release version matches Cargo.toml
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          python - <<'PY'
+          import os, tomllib
+          with open('Cargo.toml', 'rb') as source:
+              version = tomllib.load(source)['package']['version']
+          assert os.environ['GITHUB_REF_NAME'] == f'v{version}', 'Tag must match the package version'
+          PY
+      - run: cargo fmt --all -- --check
+      - run: cargo clippy --locked --target ${{ matrix.target }} --all-targets -- -D warnings
+      - run: cargo test --locked --target ${{ matrix.target }}
+      - run: cargo build --locked --release --target ${{ matrix.target }}
+      - name: Package Unix binary
+        if: matrix.platform != 'windows'
+        run: >-
+          python scripts/package_release.py
+          --binary target/${{ matrix.target }}/release/muhan
+          --platform ${{ matrix.platform }} --arch ${{ matrix.arch }}
+      - name: Test Unix installer
+        if: matrix.platform != 'windows'
+        env:
+          MUHAN_TEST_BINARY: target/${{ matrix.target }}/release/muhan
+        run: python tests/install_unix.py
+      - name: Package Windows binary
+        if: matrix.platform == 'windows'
+        run: >-
+          python scripts/package_release.py
+          --binary target/${{ matrix.target }}/release/muhan.exe
+          --platform windows --arch ${{ matrix.arch }}
+      - name: Test Windows PowerShell 5.1 installer
+        if: matrix.platform == 'windows'
+        shell: powershell
+        run: ./tests/install_windows.ps1
+      - name: Test PowerShell 7 installer
+        if: matrix.platform == 'windows'
+        shell: pwsh
+        run: ./tests/install_windows.ps1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: muhan-${{ matrix.platform }}-${{ matrix.arch }}
+          path: dist/*
+          if-no-files-found: error
+
+  publish:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Publish all six platform builds together
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh release create "$GITHUB_REF_NAME" dist/* --verify-tag --generate-notes --title "muhan $GITHUB_REF_NAME"
