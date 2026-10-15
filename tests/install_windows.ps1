@@ -8,34 +8,37 @@ $originalPath = $env:Path
 $originalUserPath = [Environment]::GetEnvironmentVariable('Path', 'User')
 $originalNoModify = $env:NO_MODIFY_PATH
 $env:NO_MODIFY_PATH = '0'
-$script:missingChecksum = $false
-$script:badChecksum = $false
-$script:requests = [Collections.Generic.List[string]]::new()
+$mockState = @{
+    MissingChecksum = $false
+    BadChecksum = $false
+    Requests = [Collections.Generic.List[string]]::new()
+}
 $nativeArch = $env:PROCESSOR_ARCHITEW6432
 if (-not $nativeArch) { $nativeArch = $env:PROCESSOR_ARCHITECTURE }
 $arch = if ($nativeArch -eq 'ARM64') { 'aarch64' } else { 'x86_64' }
-$script:fixture = Join-Path $repoRoot "dist/muhan-windows-$arch.zip"
+$mockState.Fixture = Join-Path $repoRoot "dist/muhan-windows-$arch.zip"
 
-function Invoke-RestMethod {
+# Capture shared state: $script: inside a mock would refer to install.ps1's scope.
+Set-Item -Path Function:Invoke-RestMethod -Value ({
     param($Uri, $Headers)
-    $script:requests.Add($Uri)
+    $mockState.Requests.Add($Uri)
     return @{ tag_name = 'v0.1.0' }
-}
+}.GetNewClosure())
 
-function Invoke-WebRequest {
+Set-Item -Path Function:Invoke-WebRequest -Value ({
     param([switch]$UseBasicParsing, $Uri, $OutFile)
-    $script:requests.Add($Uri)
+    $mockState.Requests.Add($Uri)
     if ($Uri.EndsWith('.sha256')) {
-        if ($script:missingChecksum) { throw 'Simulated missing checksum' }
-        if ($script:badChecksum) {
+        if ($mockState.MissingChecksum) { throw 'Simulated missing checksum' }
+        if ($mockState.BadChecksum) {
             Set-Content -LiteralPath $OutFile -Value (('0' * 64) + '  fixture.zip') -Encoding ASCII
         } else {
-            Copy-Item -LiteralPath "${script:fixture}.sha256" -Destination $OutFile
+            Copy-Item -LiteralPath "$($mockState.Fixture).sha256" -Destination $OutFile
         }
     } else {
-        Copy-Item -LiteralPath $script:fixture -Destination $OutFile
+        Copy-Item -LiteralPath $mockState.Fixture -Destination $OutFile
     }
-}
+}.GetNewClosure())
 
 function Assert($Condition, $Message) {
     if (-not $Condition) { throw $Message }
@@ -57,26 +60,26 @@ try {
     Assert ($LASTEXITCODE -eq 0 -and $about.name) 'Installed CLI must run'
     Assert (($env:Path -split ';') -contains $destination) 'Current session PATH must include install directory'
     Assert (([Environment]::GetEnvironmentVariable('Path', 'User') -split ';') -contains $destination) 'User PATH must include install directory'
-    Assert ($script:requests -contains "https://github.com/muhan-alan-li/muhancli/releases/download/v0.1.0/muhan-windows-$arch.zip") 'Latest must resolve to a pinned release'
+    Assert ($mockState.Requests -contains "https://github.com/muhan-alan-li/muhancli/releases/download/v0.1.0/muhan-windows-$arch.zip") 'Latest must resolve to a pinned release'
 
-    $script:requests.Clear()
+    $mockState.Requests.Clear()
     & "$repoRoot/install.ps1" -Destination $destination -Version v0.1.0
     $entries = @([Environment]::GetEnvironmentVariable('Path', 'User') -split ';' | Where-Object { $_ -eq $destination })
     Assert ($entries.Count -eq 1) 'Reinstall must not duplicate PATH entries'
-    Assert ($script:requests.Count -eq 2) 'Pinned version must skip latest lookup'
+    Assert ($mockState.Requests.Count -eq 2) 'Pinned version must skip latest lookup'
 
     $before = (Get-FileHash -LiteralPath $exe).Hash
     foreach ($failure in @('bad', 'missing')) {
-        $script:badChecksum = $failure -eq 'bad'
-        $script:missingChecksum = $failure -eq 'missing'
+        $mockState.BadChecksum = $failure -eq 'bad'
+        $mockState.MissingChecksum = $failure -eq 'missing'
         $rejected = $false
         try { & "$repoRoot/install.ps1" -Destination $destination -Version v0.1.0 -NoModifyPath }
         catch { $rejected = $true }
         Assert $rejected 'Invalid or missing checksums must fail'
         Assert ((Get-FileHash -LiteralPath $exe).Hash -eq $before) 'Failed update must preserve existing executable'
     }
-    $script:badChecksum = $false
-    $script:missingChecksum = $false
+    $mockState.BadChecksum = $false
+    $mockState.MissingChecksum = $false
     $otherDestination = Join-Path $testRoot 'no path modification'
     & "$repoRoot/install.ps1" -Destination $otherDestination -Version v0.1.0 -NoModifyPath
     Assert (($env:Path -split ';') -notcontains $otherDestination) 'NoModifyPath must preserve PATH'
