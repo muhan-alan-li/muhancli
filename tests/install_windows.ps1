@@ -74,6 +74,9 @@ try {
             @{ Line = 'muhan projects dune'; Expected = @('dune-imperium') },
             @{ Line = 'muhan projects --tag Re'; Expected = @('React') },
             @{ Line = 'muhan skills --group Lang'; Expected = @('Languages') },
+            @{ Line = "muhan skills --group 'Lang"; Expected = @('Languages') },
+            @{ Line = 'muhan skills --group '; Expected = @('Languages', 'Frameworks', 'Tools') },
+            @{ Line = 'Write-Output example; muhan exp'; Expected = @('experience') },
             @{ Line = 'muhan --plain experience nr'; Expected = @('nrcan') },
             @{ Line = 'muhan projects --j'; Expected = @('--json') }
         )) {
@@ -83,6 +86,8 @@ try {
             }
             Assert (-not ($candidates -match 'local-decoy')) "Completion must not suggest files for: $($case.Line)"
         }
+        Assert (-not (Test-Path Env:\MUHAN_COMPLETE)) 'Completion must restore its shell environment'
+        Assert (-not (Test-Path Env:\MUHAN_COMPLETE_WORDS)) 'Completion must restore its words environment'
     } finally {
         Pop-Location
     }

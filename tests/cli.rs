@@ -105,6 +105,28 @@ fn completion_requests_return_contextual_portfolio_values() {
         .success());
 }
 
+#[test]
+fn powershell_json_transport_preserves_empty_words() {
+    for (words, expected) in [
+        (vec!["muhan", ""], "experience"),
+        (vec!["muhan", "experience", ""], "apera-ai"),
+        (vec!["muhan", "projects", "--tag", ""], "React"),
+        (vec!["muhan", "skills", "--group", "Lang"], "Languages"),
+    ] {
+        let result = Command::new(env!("CARGO_BIN_EXE_muhan"))
+            .env("MUHAN_COMPLETE", "powershell")
+            .env(
+                "MUHAN_COMPLETE_WORDS",
+                serde_json::to_string(&words).unwrap(),
+            )
+            .output()
+            .unwrap();
+        assert!(result.status.success(), "{words:?}: {result:?}");
+        let output = String::from_utf8(result.stdout).unwrap();
+        assert!(output.contains(expected), "{words:?}: {output}");
+    }
+}
+
 #[cfg(unix)]
 #[test]
 fn bash_completion_adapter_can_be_loaded_and_invoked() {

@@ -3,11 +3,7 @@ use muhancli::render;
 use muhancli::{Cli, Commands, OutputOpts, Portfolio};
 
 fn main() {
-    clap_complete::env::CompleteEnv::with_factory(|| {
-        muhancli::completions::command(&Portfolio::load())
-    })
-    .var("MUHAN_COMPLETE")
-    .complete();
+    muhancli::completions::complete();
     let args = Cli::parse();
     let opts = OutputOpts {
         json: args.json,

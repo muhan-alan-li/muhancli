@@ -53,7 +53,9 @@ def check_interactive(shell, env, directory, line, expected):
         if shell == 'bash':
             setup = "PS1=''; PS2=''; bind 'set show-all-if-ambiguous on'; "
         else:
-            setup = "PROMPT=''; RPROMPT=''; autoload -Uz compinit; compinit -D; "
+            # Hosted runners can include writable directories in their system
+            # fpath. Ignore those directories instead of waiting for a prompt.
+            setup = "PROMPT=''; RPROMPT=''; autoload -Uz compinit; compinit -i -D; "
         setup += f'eval "$(muhan completions {shell})"; printf "\\n__MUHAN_READY__\\n"\n'
         os.write(fd, setup.encode())
         read_until(fd, lambda output: '\r\n__MUHAN_READY__\r\n' in output)
