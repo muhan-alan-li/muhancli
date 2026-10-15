@@ -1,6 +1,6 @@
 #!/bin/sh
 # Install a prebuilt release without sudo. Works with sh and bash.
-# Configuration: VERSION, DEST, REPO, NO_MODIFY_PATH=1.
+# Configuration: VERSION, DEST, REPO, NO_MODIFY_PATH=1, NO_MODIFY_COMPLETIONS=1.
 set -eu
 
 fail() { printf 'error: %s\n' "$*" >&2; exit 1; }
@@ -119,4 +119,50 @@ case ":$PATH:" in
         printf '\nTo use muhan in this terminal, run:\n  %s\n' "$PATH_LINE"
         ;;
 esac
+if [ "${NO_MODIFY_PATH:-0}" != 1 ] && [ "${NO_MODIFY_COMPLETIONS:-0}" != 1 ]; then
+    # Generate on startup so upgrades refresh the adapter. Use an absolute path
+    # for setup, including installations whose destination contains quotes.
+    COMPLETION_LINE=
+    case "${SHELL:-}" in
+        */bash)
+            COMPLETION_LINE="if [ -x '$QUOTED_DEST/muhan' ]; then eval \"\$('$QUOTED_DEST/muhan' completions bash)\"; fi"
+            ;;
+        */zsh)
+            COMPLETION_LINE="if [ -x '$QUOTED_DEST/muhan' ]; then if ! command -v compdef >/dev/null 2>&1; then autoload -Uz compinit; compinit -i; fi; eval \"\$('$QUOTED_DEST/muhan' completions zsh)\"; fi"
+            ;;
+        */fish)
+            FISH_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/fish/conf.d"
+            mkdir -p "$FISH_DIR"
+            # Fish escapes quotes with backslashes rather than POSIX quote joining.
+            FISH_DEST=$(printf '%s' "$DEST" | sed "s/\\\\/\\\\\\\\/g; s/'/\\\\'/g")
+            printf "# muhan portfolio CLI\nif test -x '%s/muhan'\n    fish_add_path '%s'\n    '%s/muhan' completions fish | source\nend\n" "$FISH_DEST" "$FISH_DEST" "$FISH_DEST" > "$FISH_DIR/muhan.fish"
+            printf 'Enabled completion in %s/muhan.fish\n' "$FISH_DIR"
+            ;;
+    esac
+    add_completion() {
+        if [ -f "$1" ] && grep -Fqx "$COMPLETION_LINE" "$1"; then return; fi
+        if printf '\n# muhan tab completion\n%s\n' "$COMPLETION_LINE" >> "$1"; then
+            printf 'Enabled completion in %s\n' "$1"
+        else
+            printf 'Could not enable completion in %s\n' "$1" >&2
+        fi
+    }
+    case "${SHELL:-}" in
+        */bash)
+            add_completion "$HOME/.bashrc"
+            if [ -f "$HOME/.bash_profile" ]; then
+                add_completion "$HOME/.bash_profile"
+            elif [ -f "$HOME/.bash_login" ]; then
+                add_completion "$HOME/.bash_login"
+            else
+                add_completion "$HOME/.profile"
+            fi
+            ;;
+        */zsh) add_completion "${ZDOTDIR:-$HOME}/.zshrc" ;;
+    esac
+    case "${SHELL:-}" in
+        */bash|*/zsh) printf '\nOpen a new terminal for completion, or run now:\n  %s\n' "$COMPLETION_LINE" ;;
+        */fish) printf '\nOpen a new Fish terminal for PATH and completion setup.\n' ;;
+    esac
+fi
 printf '\nInstalled to %s/muhan\nExplore with: muhan about\nMore commands: muhan --help\n' "$DEST"

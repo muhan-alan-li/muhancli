@@ -3,10 +3,15 @@
 $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path $PSScriptRoot -Parent
 $testRoot = Join-Path ([IO.Path]::GetTempPath()) ('muhan-test-' + [Guid]::NewGuid().ToString('N'))
-$destination = Join-Path $testRoot 'install with spaces'
+$destination = Join-Path $testRoot "install with ' quotes"
+$originalProfile = $PROFILE
+$PROFILE = Join-Path $testRoot 'Documents\PowerShell\Microsoft.PowerShell_profile.ps1'
+$PROFILE | Add-Member -NotePropertyName CurrentUserAllHosts -NotePropertyValue (Join-Path $testRoot 'Documents\PowerShell\profile.ps1')
 $originalPath = $env:Path
 $originalUserPath = [Environment]::GetEnvironmentVariable('Path', 'User')
 $originalNoModify = $env:NO_MODIFY_PATH
+$originalNoCompletion = $env:NO_MODIFY_COMPLETIONS
+$env:NO_MODIFY_COMPLETIONS = '0'
 $env:NO_MODIFY_PATH = '0'
 $mockState = @{
     MissingChecksum = $false
@@ -60,8 +65,7 @@ try {
     Assert ($LASTEXITCODE -eq 0 -and $about.name) 'Installed CLI must run'
     Assert (($env:Path -split ';') -contains $destination) 'Current session PATH must include install directory'
     Assert (([Environment]::GetEnvironmentVariable('Path', 'User') -split ';') -contains $destination) 'User PATH must include install directory'
-    # Exercise PowerShell's actual Tab expansion API with the generated adapter.
-    & $exe completions powershell | Out-String | Invoke-Expression
+    # The installer must activate completion without manual registration.
     $null = New-Item -ItemType File -Path (Join-Path $testRoot 'ap-local-decoy')
     $null = New-Item -ItemType File -Path (Join-Path $testRoot 'unrelated-local-decoy')
     Push-Location $testRoot
@@ -98,6 +102,19 @@ try {
     $entries = @([Environment]::GetEnvironmentVariable('Path', 'User') -split ';' | Where-Object { $_ -eq $destination })
     Assert ($entries.Count -eq 1) 'Reinstall must not duplicate PATH entries'
     Assert ($mockState.Requests.Count -eq 2) 'Pinned version must skip latest lookup'
+    foreach ($edition in @('WindowsPowerShell', 'PowerShell')) {
+        $profilePath = Join-Path $testRoot "Documents\$edition\profile.ps1"
+        $contents = Get-Content -LiteralPath $profilePath -Raw
+        Assert (([regex]::Matches($contents, '# muhan tab completion')).Count -eq 1) 'Reinstall must not duplicate completion setup'
+        # Load the persisted profile in a fresh process with no existing completer.
+        $quotedProfile = $profilePath.Replace("'", "''")
+        $check = ". '$quotedProfile'; if ((TabExpansion2 'muhan exp' 9).CompletionMatches.CompletionText -notcontains 'experience') { exit 1 }"
+        & (Get-Process -Id $PID).Path -NoProfile -Command $check
+        Assert ($LASTEXITCODE -eq 0) 'Persisted profile must activate completion in a new session'
+    }
+    $profileBefore = [IO.File]::ReadAllText($PROFILE.CurrentUserAllHosts)
+    & "$repoRoot/install.ps1" -Destination $destination -Version v0.1.0 -NoModifyCompletions
+    Assert ([IO.File]::ReadAllText($PROFILE.CurrentUserAllHosts) -eq $profileBefore) 'NoModifyCompletions must leave profiles unchanged'
 
     $before = (Get-FileHash -LiteralPath $exe).Hash
     foreach ($failure in @('bad', 'missing')) {
@@ -120,5 +137,7 @@ try {
     [Environment]::SetEnvironmentVariable('Path', $originalUserPath, 'User')
     $env:Path = $originalPath
     $env:NO_MODIFY_PATH = $originalNoModify
+    $env:NO_MODIFY_COMPLETIONS = $originalNoCompletion
+    $PROFILE = $originalProfile
     if (Test-Path -LiteralPath $testRoot) { Remove-Item -LiteralPath $testRoot -Recurse -Force }
 }

@@ -32,7 +32,7 @@ class InstallerTests(unittest.TestCase):
         self.env = dict(os.environ, HOME=str(self.home), SHELL="/bin/bash",
                         PATH=str(self.tools), FIXTURES=str(self.root),
                         MOCK_OS="Linux", MOCK_ARCH="x86_64")
-        for key in ["DEST", "VERSION", "REPO", "NO_MODIFY_PATH", "ZDOTDIR"]:
+        for key in ["DEST", "VERSION", "REPO", "NO_MODIFY_PATH", "NO_MODIFY_COMPLETIONS", "ZDOTDIR", "XDG_CONFIG_HOME"]:
             self.env.pop(key, None)
         self.write_tool("uname", '#!/bin/sh\ncase "$1" in -s) echo "$MOCK_OS";; -m) echo "$MOCK_ARCH";; esac\n')
         self.mock_download = f"#!{sys.executable}\n" + '''
@@ -97,15 +97,50 @@ else:
         self.install("/bin/bash")
         self.assertEqual((self.home / ".bashrc").read_text().count("export PATH="), 1)
         self.assertEqual((self.home / ".profile").read_text().count("export PATH="), 1)
+        for name in [".bashrc", ".profile"]:
+            profile = self.home / name
+            self.assertEqual(profile.read_text().count("# muhan tab completion"), 1)
+            result = subprocess.check_output(
+                ["/bin/bash", "--noprofile", "--norc", "-c", '. "$1"; complete -p muhan', "bash", str(profile)],
+                env=self.env, text=True)
+            self.assertIn("muhan", result)
 
     def test_zsh_and_custom_destination(self):
         self.env.update(SHELL="/bin/zsh", DEST=str(self.home / "custom bin"))
         self.install()
         self.assertTrue(self.installed.is_file())
+        zsh = shutil.which("zsh")
+        self.assertIsNotNone(zsh, "Install zsh to test installer activation")
         resolved = subprocess.check_output(
-            ["/bin/sh", "-c", '. "$1"; command -v muhan', "sh", str(self.home / ".zshrc")],
+            [zsh, "-f", "-c", '. "$1"; command -v muhan; print -r -- ${_comps[muhan]}', "zsh", str(self.home / ".zshrc")],
             env=self.env, text=True)
-        self.assertEqual(resolved.strip(), str(self.installed))
+        self.assertEqual(resolved.splitlines()[0], str(self.installed))
+        self.assertTrue(resolved.splitlines()[1])
+
+    def test_fish_activation(self):
+        self.env.update(SHELL="/usr/bin/fish", XDG_CONFIG_HOME=str(self.home / "config"))
+        self.install()
+        self.install()
+        profile = self.home / "config/fish/conf.d/muhan.fish"
+        self.assertEqual(profile.read_text().count("# muhan portfolio CLI"), 1)
+        fish = shutil.which("fish")
+        self.assertIsNotNone(fish, "Install fish to test installer activation")
+        result = subprocess.check_output(
+            [fish, "--no-config", "-c", 'source "$argv[1]"; complete -C "muhan experience ap"', str(profile)],
+            env=self.env, text=True)
+        self.assertIn("apera-ai", result)
+
+    def test_no_modify_completions(self):
+        self.env["NO_MODIFY_COMPLETIONS"] = "1"
+        self.install()
+        contents = (self.home / ".bashrc").read_text()
+        self.assertIn("export PATH=", contents)
+        self.assertNotIn("completions", contents)
+
+    def test_completion_when_destination_already_on_path(self):
+        self.env["PATH"] += os.pathsep + str(self.installed.parent)
+        self.install()
+        self.assertIn("completions bash", (self.home / ".bashrc").read_text())
 
     def test_wget_and_pinned_version(self):
         (self.tools / "curl").unlink()

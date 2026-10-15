@@ -85,11 +85,6 @@ jobs:
           python scripts/package_release.py
           --binary target/${{ matrix.target }}/release/muhan
           --platform ${{ matrix.platform }} --arch ${{ matrix.arch }}
-      - name: Test Unix installer
-        if: matrix.platform != 'windows'
-        env:
-          MUHAN_TEST_BINARY: target/${{ matrix.target }}/release/muhan
-        run: python tests/install_unix.py
       - name: Install completion test shells on Linux
         if: matrix.platform == 'linux'
         run: |
@@ -98,6 +93,11 @@ jobs:
       - name: Install completion test shells on macOS
         if: matrix.platform == 'macos'
         run: brew list fish >/dev/null 2>&1 || brew install fish
+      - name: Test Unix installer
+        if: matrix.platform != 'windows'
+        env:
+          MUHAN_TEST_BINARY: target/${{ matrix.target }}/release/muhan
+        run: python tests/install_unix.py
       - name: Test Bash, Zsh, and Fish completion
         if: matrix.platform != 'windows'
         run: >-

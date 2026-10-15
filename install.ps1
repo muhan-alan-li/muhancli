@@ -4,7 +4,8 @@ param(
     [string]$Version = $(if ($env:VERSION) { $env:VERSION } else { 'latest' }),
     [string]$Destination = $(if ($env:DEST) { $env:DEST } else { Join-Path $env:LOCALAPPDATA 'muhan\bin' }),
     [string]$Repository = $(if ($env:REPO) { $env:REPO } else { 'muhan-alan-li/muhancli' }),
-    [switch]$NoModifyPath
+    [switch]$NoModifyPath,
+    [switch]$NoModifyCompletions
 )
 
 # Keep preference changes local even when the installer is invoked with iex.
@@ -84,6 +85,40 @@ param(
                 $env:Path = "$Destination;$env:Path"
             }
             Write-Host 'Added muhan to PATH for this PowerShell session and future terminals.'
+        }
+        if (-not $NoModifyPath -and $env:NO_MODIFY_PATH -ne '1' -and
+            -not $NoModifyCompletions -and $env:NO_MODIFY_COMPLETIONS -ne '1') {
+            $exe = Join-Path $Destination 'muhan.exe'
+            $quotedExe = $exe.Replace("'", "''")
+            $activation = "if (Test-Path -LiteralPath '$quotedExe') { & '$quotedExe' completions powershell | Out-String | Invoke-Expression }"
+            # All-host profiles cover console and editor hosts. Configure both
+            # editions, which keep separate profile directories on Windows.
+            $currentProfile = $PROFILE.CurrentUserAllHosts
+            $profileDirectory = Split-Path $currentProfile -Parent
+            $profiles = @($currentProfile)
+            $editionDirectory = Split-Path $profileDirectory -Leaf
+            if ($editionDirectory -in @('PowerShell', 'WindowsPowerShell')) {
+                $documents = Split-Path $profileDirectory -Parent
+                $profiles += Join-Path $documents 'WindowsPowerShell\profile.ps1'
+                $profiles += Join-Path $documents 'PowerShell\profile.ps1'
+            }
+            foreach ($profilePath in ($profiles | Select-Object -Unique)) {
+                try {
+                    $null = New-Item -ItemType Directory -Path (Split-Path $profilePath -Parent) -Force
+                    $lines = @(if (Test-Path -LiteralPath $profilePath) { Get-Content -LiteralPath $profilePath })
+                    if ($lines -notcontains $activation) {
+                        # UTF-8 with BOM is understood by PowerShell 5.1 and 7.
+                        $encoding = New-Object Text.UTF8Encoding($true)
+                        $existing = if (Test-Path -LiteralPath $profilePath) { [IO.File]::ReadAllText($profilePath) } else { '' }
+                        [IO.File]::WriteAllText($profilePath, "$existing`r`n# muhan tab completion`r`n$activation`r`n", $encoding)
+                    }
+                    Write-Host "Enabled completion in $profilePath"
+                } catch {
+                    Write-Warning "Could not update ${profilePath}: $_"
+                }
+            }
+            & $exe completions powershell | Out-String | Invoke-Expression
+            Write-Host 'Enabled completion for this PowerShell session.'
         }
         Write-Host "Installed to $(Join-Path $Destination 'muhan.exe')"
         Write-Host 'Explore with: muhan about'

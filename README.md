@@ -28,7 +28,11 @@ Alpine. macOS releases target macOS 11 or newer.
 
 If needed, it adds a PATH entry to your Bash or Zsh startup files for future
 terminals. The `export` above makes it available immediately in your current
-terminal. Fish users can run `fish_add_path ~/.local/bin` instead.
+terminal. It also enables tab completion for your selected Bash, Zsh, or Fish
+shell in future terminals. Fish receives PATH and completion setup in
+`$XDG_CONFIG_HOME/fish/conf.d/muhan.fish` (default `~/.config/fish/conf.d`).
+Open a new terminal after installation, or use the activation command printed
+by the installer.
 
 If curl is unavailable, download and run with wget:
 
@@ -44,7 +48,8 @@ curl -fsSLo install-muhan.sh https://raw.githubusercontent.com/muhan-alan-li/muh
 VERSION=v0.1.0 DEST="$HOME/.local/bin" sh install-muhan.sh
 ```
 
-Set `NO_MODIFY_PATH=1` to leave shell startup files untouched. `REPO` can override
+Set `NO_MODIFY_COMPLETIONS=1` to skip completion setup. Set `NO_MODIFY_PATH=1`
+to leave all shell startup files untouched, including completion setup. `REPO` can override
 the GitHub repository when installing from a fork. A SHA-256 tool (`sha256sum` or
 `shasum`) and `tar` are required; a missing checksum or a mismatch stops the install.
 
@@ -61,7 +66,9 @@ muhan --help
 
 The installer detects x64 or ARM64, verifies the SHA-256 checksum, and installs
 `muhan.exe` to `%LOCALAPPDATA%\muhan\bin`. It updates PATH for your current
-PowerShell session and future terminals. No administrator access, Rust toolchain,
+PowerShell session and future terminals. Completion is activated immediately and
+added to the current-user, all-host profiles for both Windows PowerShell and
+PowerShell 7. No administrator access, Rust toolchain,
 or separate Visual C++ runtime installation is required.
 
 To review the script or pass options, download it first and invoke its contents:
@@ -72,9 +79,9 @@ Get-Content .\install-muhan.ps1
 & ([scriptblock]::Create((Get-Content .\install-muhan.ps1 -Raw))) -Version v0.1.0 -Destination "$env:LOCALAPPDATA\muhan\bin"
 ```
 
-`-NoModifyPath` skips PATH changes; invoke the executable by its full path in that
-case. `-Repository` selects a fork. The installer also accepts `VERSION`, `DEST`,
-`REPO`, and `NO_MODIFY_PATH=1` environment variables.
+`-NoModifyCompletions` skips completion setup. `-NoModifyPath` skips both PATH
+and profile changes; invoke the executable by its full path in that case. `-Repository` selects a fork. The installer also accepts `VERSION`, `DEST`,
+`REPO`, `NO_MODIFY_PATH=1`, and `NO_MODIFY_COMPLETIONS=1` environment variables.
 
 ## Explore
 
@@ -107,7 +114,12 @@ commands, flags, experience IDs, project slugs, project stack tags, and skill
 groups. For example, type `muhan experience ap` then press Tab to get `apera-ai`.
 Suggestions come from the installed binary and work offline.
 
-Enable it in your current shell after putting `muhan` on PATH:
+The installers enable completion automatically for Bash, Zsh, Fish, and
+PowerShell. Unix installers configure the shell selected by `$SHELL`; rerun the
+installer with a different `SHELL` value to configure another shell.
+
+For source installations, or to activate it in an existing Unix terminal,
+run the following after putting `muhan` on PATH:
 
 ```bash
 # Bash (including macOS's bundled Bash 3.2)
@@ -136,12 +148,11 @@ in `~/.bashrc`, `${ZDOTDIR:-$HOME}/.zshrc`, `~/.config/fish/config.fish` (or you
 Fish config under `XDG_CONFIG_HOME`), or the PowerShell `$PROFILE` file. In Zsh,
 place it after `compinit`. Bash login shells should load `~/.bashrc` from their
 login profile. PowerShell profiles are specific to each host, so configure both
-Windows PowerShell and PowerShell 7 if you use both. The installers configure
-PATH; completion activation is a separate, one-time setup.
+Windows PowerShell and PowerShell 7 if you use both and installed from source.
 
 Generate the adapter on each shell startup as shown above, so updates refresh
 both the adapter and the suggestions. To remove completion, delete its activation
-line and start a new shell. Elvish users can add
+line (or the installer-created Fish `conf.d/muhan.fish` file) and start a new shell. Elvish users can add
 `eval (muhan completions elvish | slurp)` to their shell config.
 
 ## Update or uninstall
@@ -156,7 +167,9 @@ rm "$HOME/.local/bin/muhan"
 ```
 
 You can also remove the `# muhan portfolio CLI` entry and its following PATH line
-from the shell startup files reported by the installer.
+and the `# muhan tab completion` entry and following activation line
+from the shell startup files reported by the installer. Fish users can delete
+`~/.config/fish/conf.d/muhan.fish` (or its equivalent under `XDG_CONFIG_HOME`).
 
 To uninstall on Windows:
 
@@ -165,7 +178,9 @@ Remove-Item "$env:LOCALAPPDATA\muhan\bin\muhan.exe"
 ```
 
 Remove `%LOCALAPPDATA%\muhan\bin` from your user PATH using Windows' Environment
-Variables settings. Adjust these paths if you selected a custom destination.
+Variables settings, and remove the `# muhan tab completion` entry and activation
+line from the profile files reported by the installer. Adjust these paths if you
+selected a custom destination.
 
 ## Build from source
 
