@@ -60,8 +60,7 @@ const MAX_BODY_WIDTH: usize = 100;
 fn body_width() -> usize {
     textwrap::termwidth()
         .saturating_sub(4)
-        .min(MAX_BODY_WIDTH)
-        .max(4)
+        .clamp(4, MAX_BODY_WIDTH)
 }
 
 /// Wraps a prose paragraph into display lines (no indent) at the body width.
