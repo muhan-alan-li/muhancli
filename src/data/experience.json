@@ -6,14 +6,13 @@
     "location": "Vancouver, BC",
     "start": "Sep 2025",
     "end": "Apr 2026",
-    "bullets": [
-      "Shipped self-serve asset deployment with live status tracking (REST API, React/TypeScript), replacing a manual support-ticket workflow and cutting deployment time from ~12hrs to ~5min",
-      "Extended Python/Redis DAG job scheduler with containerized execution and job caching, isolating deployment jobs and preventing redundant runs",
-      "Added support for a new robot class, modeling joint limits and bin-picking behavior, enabling sales teams to validate product fit for prospective customers through simulation of production environment",
-      "Implemented cross-user content sharing with recursive object copying and DynamoDB transactional writes, preserving nested object relationships and preventing dangling-reference failures",
-      "Built continuous collision detection using spatial hashing in Three.js, maintaining 60+ FPS through memoization"
+    "desc": [
+      "Apera AI's main product is a ML computer vision system that is used for manufacturing automation. If robots in an assembly line acted as arms and hands, you can think of Apera AI's system as the eyes and brains. I worked on the asset team at Apera, where I shipped features end to end for Apera Forge, which is a web portal for users to train computer vision models, and evaluate their models in simulated production environments.",
+      "I extended the DAG-based job orchestration service to enable a self-serve UX flow for users to deploy robot configuration and trained computer vision models to their production system. I used Python and Docker to define a new type of job node, and implemented the packaging and signing logic in the job node to create a packaged asset. In the web app, I designed a new React component, leveraging dependency injection to enable modular use with different types of data. I combined this component with updated schemas and REST endpoints in the backend to enable the full self-serve UX for asset deployment. This feature was able to reduce downtime for asset deployment requests from upwards of an entire day down to 5 minutes.",
+      "I also lead a refactor of data sharing between user accounts in Forge. I reworked a nested object copying logic to ensure correctness in deep copying, and also wrote custom logic to reattach uuids to avoid dangling references in newly made copies. To ensure data safety, I used boto3's DynamoDB transactional write API to ensure atomicity during copy creation. This refactor was able to almost entirely eliminate support requests related to object creation errors during data sharing.",
+      "Aside from features I owned, I also worked on a number of tooling improvements for Forge. This included expanding supported line of robots to include robot models with `n` number of joints, configuring logic to limit robot joint angle rotation based on the robot schema, and collision detection and highlighting in the data generation configuration tool. The goal of these tooling improvements were always about improving the alignment of Forge's simulation to the real world production environment. For these simpler modifications to Forge, my focus was about ensuring that my changes were surgical, my PRs easy to review, and my UX changes relevant to Forge as a product."
     ],
-    "tags": ["TypeScript", "React", "REST", "Python", "Redis", "DynamoDB", "Three.js", "Docker"]
+    "tags": ["TypeScript", "React", "REST", "Python", "DynamoDB", "Three.js", "Docker"]
   },
   {
     "id": "nrcan",
