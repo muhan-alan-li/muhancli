@@ -16,7 +16,11 @@ fn ids_and_slugs_unique() {
     for e in &p.experience {
         assert!(!e.id.is_empty());
         assert!(ids.insert(e.id.to_lowercase()), "duplicate id {}", e.id);
-        assert!(!e.bullets.is_empty(), "empty bullets {}", e.id);
+        assert!(
+            !e.bullets.is_empty() || !e.desc.is_empty(),
+            "empty body {}",
+            e.id
+        );
     }
     let mut slugs = std::collections::HashSet::new();
     for pr in &p.projects {

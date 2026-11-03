@@ -36,8 +36,27 @@ pub struct Experience {
     pub location: String,
     pub start: String,
     pub end: String,
+    #[serde(default)]
     pub bullets: Vec<String>,
+    #[serde(default)]
+    pub desc: Vec<String>,
     pub tags: Vec<String>,
+}
+
+impl Experience {
+    /// Body content: `desc` paragraphs if present, otherwise bullet points.
+    pub fn body(&self) -> &[String] {
+        if self.desc.is_empty() {
+            &self.bullets
+        } else {
+            &self.desc
+        }
+    }
+
+    /// True when body content is long-form paragraphs (`desc`) rather than bullets.
+    pub fn is_prose(&self) -> bool {
+        !self.desc.is_empty()
+    }
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]

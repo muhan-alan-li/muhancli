@@ -20,7 +20,7 @@ impl OutputOpts {
     }
 }
 
-fn bold(s: &str, color: bool) -> String {
+pub(crate) fn bold(s: &str, color: bool) -> String {
     if color {
         format!("\x1b[1m{s}\x1b[0m")
     } else {
@@ -28,7 +28,7 @@ fn bold(s: &str, color: bool) -> String {
     }
 }
 
-fn cyan(s: &str, color: bool) -> String {
+pub(crate) fn cyan(s: &str, color: bool) -> String {
     if color {
         format!("\x1b[36m{s}\x1b[0m")
     } else {
@@ -36,7 +36,7 @@ fn cyan(s: &str, color: bool) -> String {
     }
 }
 
-fn dim(s: &str, color: bool) -> String {
+pub(crate) fn dim(s: &str, color: bool) -> String {
     if color {
         format!("\x1b[2m{s}\x1b[0m")
     } else {
@@ -50,6 +50,31 @@ fn bullet(point: &str, color: bool) -> String {
     } else {
         format!("  - {point}")
     }
+}
+
+const MAX_BODY_WIDTH: usize = 100;
+
+/// Wrap width for prose paragraphs: track the terminal width (leaving room for
+/// the indent), capped so wide terminals don't produce an overly long reading
+/// measure. Narrow terminals get the full available width.
+fn body_width() -> usize {
+    textwrap::termwidth()
+        .saturating_sub(4)
+        .min(MAX_BODY_WIDTH)
+        .max(4)
+}
+
+/// Wraps a prose paragraph into display lines (no indent) at the body width.
+pub(crate) fn wrap_prose(text: &str) -> Vec<String> {
+    textwrap::fill(text, body_width())
+        .lines()
+        .map(String::from)
+        .collect()
+}
+
+fn paragraph(text: &str) -> String {
+    let lines: Vec<String> = wrap_prose(text).iter().map(|l| format!("  {l}")).collect();
+    lines.join("\n")
 }
 
 pub fn render_about(p: &Portfolio, opts: OutputOpts) -> String {
@@ -117,8 +142,14 @@ pub fn render_experience_show(e: &Experience, opts: OutputOpts) -> String {
         out.push_str(&format!("{}\n", dim(&e.tags.join(" · "), c)));
     }
     out.push('\n');
-    for b in &e.bullets {
-        out.push_str(&format!("{}\n", bullet(b, c)));
+    if e.is_prose() {
+        let paragraphs: Vec<String> = e.body().iter().map(|d| paragraph(d)).collect();
+        out.push_str(&paragraphs.join("\n\n"));
+        out.push('\n');
+    } else {
+        for b in e.body() {
+            out.push_str(&format!("{}\n", bullet(b, c)));
+        }
     }
     out.trim_end().to_string()
 }
