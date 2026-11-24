@@ -5,7 +5,7 @@ use clap::{Parser, Subcommand};
 #[command(
     name = "muhan",
     version,
-    about = "Portfolio CLI — experience, projects, skills"
+    about = "Portfolio browser & CLI — experience, projects, skills"
 )]
 pub struct Cli {
     /// Output raw JSON instead of human-readable text.
@@ -22,6 +22,8 @@ pub struct Cli {
 
 #[derive(Debug, Subcommand)]
 pub enum Commands {
+    /// Open the interactive column browser (the default in a terminal).
+    Tui,
     /// Show bio, education, and links.
     About,
     /// List work experience or show one role in detail.

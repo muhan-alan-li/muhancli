@@ -2,6 +2,7 @@ pub mod cli;
 pub mod completions;
 pub mod data;
 pub mod render;
+pub mod tui;
 
 pub use cli::{Cli, Commands};
 pub use data::Portfolio;

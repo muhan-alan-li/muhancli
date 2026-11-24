@@ -38,6 +38,25 @@ fn commands_work_without_external_data_files() {
 }
 
 #[test]
+fn tui_is_the_default_in_a_terminal_and_keeps_a_cli_fallback() {
+    let help = String::from_utf8(muhan(&["--help"]).stdout).unwrap();
+    assert!(
+        help.contains("tui"),
+        "the browser must be discoverable in --help"
+    );
+
+    // Piped output stays non-interactive, so the existing commands keep working.
+    let piped = muhan(&[]);
+    assert!(piped.status.success());
+    assert!(String::from_utf8_lossy(&piped.stdout).contains("Explore:"));
+
+    // An explicit request without a terminal fails cleanly instead of hanging.
+    let no_tty = muhan(&["tui"]);
+    assert_eq!(no_tty.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&no_tty.stderr).contains("interactive terminal"));
+}
+
+#[test]
 fn json_is_parseable_and_bad_input_has_a_failure_status() {
     let result = muhan(&["--json", "about"]);
     assert!(result.status.success());

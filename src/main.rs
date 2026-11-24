@@ -5,12 +5,14 @@ use muhancli::{Cli, Commands, OutputOpts, Portfolio};
 fn main() {
     muhancli::completions::complete();
     let args = Cli::parse();
+    let requested_tui = matches!(args.command.as_ref(), Some(Commands::Tui));
+    let no_command = args.command.is_none();
     let opts = OutputOpts {
         json: args.json,
         plain: args.plain,
     };
     let portfolio = Portfolio::load();
-    let show_intro = args.command.is_none() && !args.json;
+    let show_intro = no_command && !args.json;
     let command = args.command.unwrap_or(Commands::About);
 
     if let Commands::Completions { shell } = command {
@@ -20,6 +22,16 @@ fn main() {
                 std::process::exit(1);
             },
         );
+        return;
+    }
+
+    // Interactive mode is the default for humans; subcommands stay scriptable.
+    let auto_tui = no_command && !args.json && !args.plain && muhancli::tui::is_interactive();
+    if requested_tui || auto_tui {
+        if let Err(error) = muhancli::tui::run(&portfolio) {
+            eprintln!("error: could not start the browser: {error}");
+            std::process::exit(1);
+        }
         return;
     }
 
@@ -90,6 +102,7 @@ fn main() {
         },
         Commands::Contact => render::render_contact(&portfolio, opts),
         Commands::Version => render::render_version(),
+        Commands::Tui => unreachable!("the browser was handled above"),
         Commands::Completions { .. } => unreachable!("completions were handled above"),
     };
 

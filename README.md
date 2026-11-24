@@ -1,8 +1,10 @@
 # muhan — portfolio in the terminal
 
-Explore Muhan Li's experience, projects, and skills from your terminal. Installs a
-single executable with the portfolio content bundled inside. No Rust installation,
-account, or server connection is needed to use a prebuilt release.
+Explore Muhan Li's experience, projects, and skills from your terminal. The
+main mode is an interactive, file-explorer-style browser; every section is also
+available as a plain command for scripts and pipes. Installs a single executable
+with the portfolio content bundled inside. No Rust installation, account, or
+server connection is needed to use a prebuilt release.
 
 ## Linux and macOS
 
@@ -83,9 +85,37 @@ Get-Content .\install-muhan.ps1
 and profile changes; invoke the executable by its full path in that case. `-Repository` selects a fork. The installer also accepts `VERSION`, `DEST`,
 `REPO`, `NO_MODIFY_PATH=1`, and `NO_MODIFY_COMPLETIONS=1` environment variables.
 
+## Interactive browser
+
+Run `muhan` in a terminal (or `muhan tui`) to open the browser. It walks the
+resume like columns in a file explorer:
+
+```
+Portfolio │ About      │ Profile / Education / Links │ detail pane
+          │ Experience │ work roles                  │ (wrapped, scrollable)
+          │ Projects   │ side projects               │
+          │ Skills     │ skill groups                │
+          │ Contact    │                             │
+```
+
+- **← / →** move between columns. **→** drills into the highlighted item; when
+  the item has no children it focuses the detail pane instead. **←** steps back
+  toward the root.
+- **↑ / ↓** move the selection inside a column, or scroll the detail pane when
+  it is focused. **j / k / h / l** work too.
+- **Enter** drills in, **Backspace** closes the deepest column, **Page Up / Page
+  Down** scroll the detail pane, and **q**, **Esc**, or **Ctrl-C** quit.
+
+The breadcrumb at the top shows where you are; the rightmost pane shows the
+full details of the highlighted item. Piped or redirected output never starts
+the browser — `muhan` falls back to the plain-text introduction, so scripts and
+the subcommands below keep working as before.
+
 ## Explore
 
-Run `muhan` alone for an introduction and suggested commands.
+Run `muhan` alone in a terminal for the browser. When output is piped, it
+prints an introduction and suggested commands instead. The subcommands below
+are always non-interactive.
 
 ```sh
 muhan about
