@@ -7,12 +7,12 @@
     "start": "Sep 2025",
     "end": "Apr 2026",
     "desc": [
-      "Apera AI's main product is a ML computer vision system that is used for manufacturing automation. If robots in an assembly line acted as arms and hands, you can think of Apera AI's system as the eyes and brains. I worked on the asset team at Apera, where I shipped features end to end for Apera Forge, which is a web portal for users to train computer vision models, and evaluate their models in simulated production environments.",
-      "I extended the DAG-based job orchestration service to enable a self-serve UX flow for users to deploy robot configuration and trained computer vision models to their production system. I used Python and Docker to define a new type of job node, and implemented the packaging and signing logic in the job node to create a packaged asset. In the web app, I designed a new React component, leveraging dependency injection to enable modular use with different types of data. I combined this component with updated schemas and REST endpoints in the backend to enable the full self-serve UX for asset deployment. This feature was able to reduce downtime for asset deployment requests from upwards of an entire day down to 5 minutes.",
-      "I also lead a refactor of data sharing between user accounts in Forge. I reworked a nested object copying logic to ensure correctness in deep copying, and also wrote custom logic to reattach uuids to avoid dangling references in newly made copies. To ensure data safety, I used boto3's DynamoDB transactional write API to ensure atomicity during copy creation. This refactor was able to almost entirely eliminate support requests related to object creation errors during data sharing.",
-      "Aside from features I owned, I also worked on a number of tooling improvements for Forge. This included expanding supported line of robots to include robot models with `n` number of joints, configuring logic to limit robot joint angle rotation based on the robot schema, and collision detection and highlighting in the data generation configuration tool. The goal of these tooling improvements were always about improving the alignment of Forge's simulation to the real world production environment. For these simpler modifications to Forge, my focus was about ensuring that my changes were surgical, my PRs easy to review, and my UX changes relevant to Forge as a product."
+      "Apera AI's main product is a machine learning computer vision system used for manufacturing automation. If robots on an assembly line are the arms and hands, you can think of Apera AI's system as the eyes and brains. I worked on the asset team at Apera, where I shipped features end-to-end for Apera Forge, a web portal that allows users to train computer vision models and evaluate them in simulated production environments.",
+      "I extended the DAG-based job orchestration service to support a self-serve UX flow for deploying robot configurations and trained computer vision models to production systems. Using Python and Docker, I defined a new type of job node and implemented the packaging and signing logic required to create deployable assets. In the web app, I designed a new React component that leveraged dependency injection to support modular use across different types of data. I integrated this component with updated schemas and REST endpoints in the backend to deliver the complete self-serve deployment workflow. This feature reduced the turnaround time for asset deployment requests from upwards of an entire day to just five minutes.",
+      "I also led a refactor of data sharing between user accounts in Forge. I reworked the nested object-copying logic to ensure correctness when performing deep copies, and implemented custom logic to reassign UUIDs and prevent dangling references in newly created copies. To ensure data integrity, I used boto3's DynamoDB transactional write API to guarantee atomicity during copy creation. This refactor almost entirely eliminated support requests related to object creation errors during data sharing.",
+      "Beyond the features I owned, I also contributed to several tooling improvements in Forge. These included expanding robot support to accommodate models with an arbitrary number of joints, implementing joint rotation limits based on robot schemas, and adding collision detection and highlighting to the data generation configuration tool. The goal of these improvements was to better align Forge's simulations with real-world production environments. For these smaller modifications, I focused on keeping changes surgical, making PRs easy to review, and ensuring UX changes made sense in the context of Forge as a product."
     ],
-    "tags": ["TypeScript", "React", "REST", "Python", "DynamoDB", "Three.js", "Docker"]
+    "tags": ["TypeScript", "React", "REST APIs", "Python", "Flask", "DynamoDB", "Three.js", "Docker"]
   },
   {
     "id": "nrcan",
@@ -22,11 +22,13 @@
     "start": "May 2025",
     "end": "Aug 2025",
     "bullets": [
-      "Ported the ANSE simulation engine from Windows-only .NET to a cross-platform C# runtime, replacing incompatible dependencies and refactoring platform-specific code to support Linux and macOS",
-      "Shipped a C# transformation library that normalized multiple inconsistent Excel schemas into ANSE's engine-specific text format, centralizing format-specific conversion logic",
-      "Automated ANSE build and deployment with GitHub CI/CD and containerized environments with Docker"
+      "At Natural Resources Canada, I worked with the carbon accounting team based at the Pacific Forestry Centre in Victoria, BC. The team's main software product is ANSE (Abstract Simulation Network Engine). Carbon accounting involves tracking the lifecycle of carbon, from when it is absorbed by a tree from atmospheric CO2, to when the tree is harvested, processed into lumber, built into furniture, recycled into woodchips, and eventually burned or discarded in a landfill. Of course, not all units of carbon follow this exact path.",
+      "ANSE models these processes as a network of nodes connected by upstream and downstream weights, simulating the flow of carbon from source nodes to end nodes over a given time period. For example, a user might use ANSE to simulate the movement of carbon across the state of California over the course of 2025. ANSE's primary users were forestry researchers across North America.",
+      "My team consisted of two engineers, another co-op student, a PhD-level forestry researcher, and myself. My primary responsibility was building a C# data transformation library for ANSE. The main challenge was normalizing data from Excel spreadsheets and text files, which could follow several different valid schemas. I implemented a generalized process for iterating through Excel worksheets by row and column, along with fallback logic that attempted to match each row against multiple possible schemas. After completing the Excel-to-data functionality ahead of schedule, I expanded the library to support exporting data from SQLite to text and Excel formats.",
+      "Beyond the data transformation library, I also updated the build process for the core ANSE engine. I replaced manual builds through the .NET CLI with a Docker Compose configuration to automate and standardize builds and releases. Additionally, I configured GitHub Actions to evaluate test coverage on pushes to development branches against the main release branch.",
+      "I also collaborated with two other developers on an Electron-based data dashboard. I developed a table component for handling parameterized SQL queries using React and JavaScript. Although I had less time to contribute to this project than to my other responsibilities, I focused on delivering a well-abstracted component that handled state transitions cleanly and could be easily integrated into the rest of the application or reused elsewhere."
     ],
-    "tags": ["C#", ".NET", "Docker", "GitHub Actions"]
+    "tags": ["C#", ".NET", "Docker", "GitHub Actions", "Electron", "React", "Javascript"]
   },
   {
     "id": "ubc-cic",
@@ -36,10 +38,27 @@
     "start": "Jan 2023",
     "end": "Aug 2023",
     "bullets": [
-      "Delivered two full-stack AWS applications end-to-end for internal and external clients, translating requirements into serverless architectures, implementation plans, and deployed software",
-      "Built a video-processing pipeline with Kinesis Video Streams, Rekognition, and Lambda for facial anonymization",
-      "Shipped an anonymous drug-checking platform with React and AWS CDK, using Cognito, DynamoDB, API Gateway, and JWT-based authorization for anonymous and admin workflows"
+      "The UBC Cloud Innovation Center is a collaboration between UBC and AWS, where students lead the development and delivery of open-source projects for non-profit organizations. Projects at the CIC typically span three to four months, with deliverables consisting of a fully functional proof of concept and detailed documentation outlining how to scale the solution for production on AWS. Over my eight-month co-op term, I worked with another developer to deliver two projects: Harm Reduction and Video Assessment.",
+      "For both projects, we built from the ground up, gathering requirements and refining our designs through direct meetings with non-technical clients. We then divided responsibilities and handled the implementation ourselves.",
+      "The Video Assessment project was an internal initiative, with the CIC's project manager and director serving as our clients. The goal was to explore the feasibility of a WebRTC-based video ingestion application. Potential use cases included allowing customers of medical clinics or law firms to submit videos for anonymization. My primary responsibility was designing the backend architecture for the video ingestion pipeline. The pipeline used Amazon Rekognition to apply ML-based anonymization to individual clips, followed by Amazon Kinesis Video Streams to stitch the clips into complete videos. S3 buckets were used to store clips during processing, while AWS Lambda functions handled state transitions as clips progressed through the pipeline.",
+      "The Harm Reduction project was an external initiative developed for the UBC Hein Lab. Their goal was to give students on campus a way to anonymously test the contents of drugs. For example, a student could submit a cannabis sample to a dropbox and receive results indicating whether the sample contained potentially dangerous substances. My teammate and I collaborated across the stack, meeting with the clients biweekly to gather requirements, discuss design and architecture decisions, and present our proof of concept.",
+      "I used Figma to design frontend mockups and implemented the web client using JavaScript and React. Privacy and restricted data access were particularly important for this project. I implemented JWT-based authorization to ensure users could only access their own results, and configured Amazon Cognito, DynamoDB, and API Gateway to support the anonymous user workflow."
     ],
-    "tags": ["AWS", "React", "AWS CDK", "Lambda", "DynamoDB", "Cognito", "API Gateway"]
+    "tags": ["Amazon Web Services (AWS)", "React", "Javascript", "Python", "AWS Cloudformation", "Lambda", "DynamoDB", "Cognito", "API Gateway"]
+  },
+  {
+    "id": "sierra-wireless",
+    "company": "Sierra Wireless",
+    "role": "Software Test Engineer",
+    "location": "Richmond, BC",
+    "start": "May 2022",
+    "end": "Dec 2022",
+    "bullets": [
+      "On the test engineering team at Sierra Wireless, I focused on modem reliability, regression testing, and hardware-software integration for cellular IoT products.",
+      "I designed and executed regression and stress tests for modem firmware, translating manual test cases into automated Python and Selenium tests built on internal libraries. I deployed the automated tests on hardware test racks and developed SMS and hardware testing workflows that reduced testing time and costs by approximately 75%.",
+      "I also triaged bug reports and customer-reported issues, collaborating with firmware and hardware engineering teams to drive defects from initial discovery through resolution. This involved developing reproducible test cases to isolate issues, validate fixes, and prevent regressions. In addition, I performed specialized hardware and driver testing with the Windows Hardware Lab Kit (HLK) and prepared test reports documenting the results and findings.",
+      "Alongside my technical responsibilities, I helped onboard and train incoming co-op students by developing training plans, delegating learning tasks, and reviewing their progress in regular one-on-one meetings."
+    ],
+    "tags": ["Python", "Selenium", "Linux", "Windows HLK", "Hardware Testing", "Test Automation", "Jira", "Agile", "Software Testing"]
   }
 ]
