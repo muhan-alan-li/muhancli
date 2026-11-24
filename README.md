@@ -95,8 +95,10 @@ Portfolio │ About      │ Profile / Education / Links │ detail pane
           │ Experience │ work roles                  │ (wrapped, scrollable)
           │ Projects   │ side projects               │
           │ Skills     │ skill groups                │
-          │ Contact    │                             │
 ```
+
+`About` is the single home for personal information: bio, phone, email,
+education, and links. There is no separate `Contact` branch or subcommand.
 
 - **← / →** move between columns. **→** drills into the highlighted item; when
   the item has no children it focuses the detail pane instead. **←** steps back
@@ -125,9 +127,11 @@ muhan projects
 muhan projects --tag react
 muhan projects dune-imperium
 muhan skills --group Languages
-muhan contact
 muhan version
 ```
+
+`muhan about` includes email, phone, education, and links — the old
+`muhan contact` command was folded into it to match the browser.
 
 Use `--json` for machine-readable output or `--plain` to disable colors.
 `NO_COLOR` is respected, and piped output has no color codes.

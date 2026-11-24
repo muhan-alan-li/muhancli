@@ -100,7 +100,6 @@ fn main() {
                 render::render_skills(&all, opts)
             }
         },
-        Commands::Contact => render::render_contact(&portfolio, opts),
         Commands::Version => render::render_version(),
         Commands::Tui => unreachable!("the browser was handled above"),
         Commands::Completions { .. } => unreachable!("completions were handled above"),
@@ -108,7 +107,7 @@ fn main() {
 
     println!("{output}");
     if show_intro {
-        println!("\nExplore: muhan experience | muhan projects | muhan skills | muhan contact");
+        println!("\nExplore: muhan about | muhan experience | muhan projects | muhan skills");
         println!("All commands: muhan --help");
     }
 }

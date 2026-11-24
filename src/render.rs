@@ -215,27 +215,6 @@ pub fn render_skills(groups: &[&SkillGroup], opts: OutputOpts) -> String {
     out.trim_end().to_string()
 }
 
-pub fn render_contact(p: &Portfolio, opts: OutputOpts) -> String {
-    if opts.json {
-        let v = serde_json::json!({
-            "name": p.profile.name,
-            "email": p.profile.email,
-            "phone": p.profile.phone,
-            "links": p.profile.links,
-        });
-        return serde_json::to_string_pretty(&v).unwrap();
-    }
-    let c = opts.colors_enabled();
-    let mut out = String::new();
-    out.push_str(&format!("{}\n", bold(&p.profile.name, c)));
-    out.push_str(&format!("Email: {}\n", p.profile.email));
-    out.push_str(&format!("Phone: {}\n", p.profile.phone));
-    for l in &p.profile.links {
-        out.push_str(&format!("{}: {}\n", l.label, l.url));
-    }
-    out.trim_end().to_string()
-}
-
 pub fn render_version() -> String {
     format!(
         "muhan {} ({} {})",

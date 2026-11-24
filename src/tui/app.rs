@@ -280,19 +280,13 @@ mod tests {
     }
 
     #[test]
-    fn leaf_categories_jump_straight_to_the_pane() {
+    fn leaf_items_jump_straight_to_the_pane() {
         let mut a = app();
-        a.move_down(); // Experience
-        a.move_down(); // Projects
-        a.move_down(); // Skills
-        a.move_down(); // Contact
-        assert_eq!(a.detail_node().label, "Contact");
-        a.move_right();
-        assert_eq!(
-            a.focus, 1,
-            "contact has no children, so the pane is focused"
-        );
-        assert_eq!(a.detail_node().label, "Contact");
+        a.move_right(); // into About's children
+        assert_eq!(a.detail_node().label, "Profile");
+        a.move_right(); // Profile has no children, so focus the pane
+        assert_eq!(a.focus, 2);
+        assert_eq!(a.detail_node().label, "Profile");
     }
 
     #[test]

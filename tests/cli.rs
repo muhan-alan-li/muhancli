@@ -18,7 +18,6 @@ fn commands_work_without_external_data_files() {
         vec!["projects", "--tag", "react"],
         vec!["projects", "dune-imperium"],
         vec!["skills", "--group", "Languages"],
-        vec!["contact"],
         vec!["version"],
         vec!["--help"],
         vec!["--version"],
@@ -35,6 +34,19 @@ fn commands_work_without_external_data_files() {
             "piped output has ANSI escapes"
         );
     }
+}
+
+#[test]
+fn about_is_the_only_home_for_contact_details() {
+    let about = String::from_utf8(muhan(&["about"]).stdout).unwrap();
+    assert!(about.contains("muhanli.work@gmail.com"));
+    assert!(about.contains("778-680-8519"));
+    assert!(about.contains("https://github.com/muhan-alan-li"));
+    assert!(about.contains("University of British Columbia"));
+
+    let removed = muhan(&["contact"]);
+    assert_eq!(removed.status.code(), Some(2));
+    assert!(String::from_utf8_lossy(&removed.stderr).contains("unrecognized subcommand"));
 }
 
 #[test]

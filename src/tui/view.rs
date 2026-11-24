@@ -264,7 +264,7 @@ mod tests {
         let rendered = screen(&app, 100, 30);
         assert!(rendered.contains("Portfolio / About"));
         assert!(rendered.contains("Experience"));
-        assert!(rendered.contains("Drill in to read each part"));
+        assert!(rendered.contains("all live here"));
 
         app.move_right();
         let rendered = screen(&app, 100, 30);

@@ -78,7 +78,6 @@ pub fn build_tree(p: &Portfolio) -> Node {
             experience_node(p),
             projects_node(p),
             skills_node(p),
-            contact_node(p),
         ])
 }
 
@@ -126,7 +125,8 @@ fn about_node(p: &Portfolio) -> Node {
             DetailLine::Subtitle(p.profile.tagline.clone()),
             DetailLine::Blank,
             DetailLine::Text(
-                "Profile, education, and links. Drill in to read each part in the pane on the right."
+                "Bio, phone, email, links, and education all live here. Drill in \
+                 to read each part in the pane on the right."
                     .to_string(),
             ),
         ])
@@ -238,21 +238,6 @@ fn skills_node(p: &Portfolio) -> Node {
         .with_children(groups)
 }
 
-fn contact_node(p: &Portfolio) -> Node {
-    let mut detail = vec![
-        DetailLine::Title(p.profile.name.clone()),
-        DetailLine::Text(format!("Email: {}", p.profile.email)),
-        DetailLine::Text(format!("Phone: {}", p.profile.phone)),
-        DetailLine::Blank,
-        DetailLine::Heading("Online".to_string()),
-    ];
-    for l in &p.profile.links {
-        detail.push(DetailLine::Bullet(format!("{}: {}", l.label, l.url)));
-    }
-    // Contact is a leaf: pressing Right jumps straight to the preview pane.
-    Node::new("Contact", "Email, phone, profiles").with_detail(detail)
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -265,10 +250,31 @@ mod tests {
     fn root_has_all_resume_sections() {
         let root = tree();
         let labels: Vec<&str> = root.children.iter().map(|n| n.label.as_str()).collect();
-        assert_eq!(
-            labels,
-            ["About", "Experience", "Projects", "Skills", "Contact"]
-        );
+        assert_eq!(labels, ["About", "Experience", "Projects", "Skills"]);
+    }
+
+    #[test]
+    fn contact_details_live_under_about_only() {
+        let p = Portfolio::load();
+        let root = build_tree(&p);
+        assert!(root.children.iter().all(|n| n.label != "Contact"));
+
+        let about = &root.children[0];
+        let labels: Vec<&str> = about.children.iter().map(|n| n.label.as_str()).collect();
+        assert_eq!(labels, ["Profile", "Education", "Links"]);
+
+        let profile = &about.children[0];
+        let profile_detail = profile
+            .detail
+            .iter()
+            .filter_map(|l| match l {
+                DetailLine::Text(s) => Some(s.as_str()),
+                _ => None,
+            })
+            .collect::<Vec<_>>()
+            .join(" ");
+        assert!(profile_detail.contains(&p.profile.email));
+        assert!(profile_detail.contains(&p.profile.phone));
     }
 
     #[test]

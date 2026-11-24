@@ -47,8 +47,6 @@ pub enum Commands {
         #[arg(long)]
         group: Option<String>,
     },
-    /// Show contact info.
-    Contact,
     /// Generate a shell completion script (see README for setup).
     Completions {
         /// Shell that will load the generated script.
