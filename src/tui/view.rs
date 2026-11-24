@@ -270,7 +270,7 @@ mod tests {
         let rendered = screen(&app, 100, 30);
         assert!(rendered.contains("About / Profile"));
         assert!(rendered.contains("muhanli.work@gmail.com"));
-        assert!(rendered.contains("Name, tagline"));
+        assert!(rendered.contains("Bio, contact"));
     }
 
     #[test]

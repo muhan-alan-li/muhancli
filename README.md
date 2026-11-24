@@ -91,7 +91,7 @@ Run `muhan` in a terminal (or `muhan tui`) to open the browser. It walks the
 resume like columns in a file explorer:
 
 ```
-Portfolio │ About      │ Profile / Education / Links │ detail pane
+Portfolio │ About      │ Profile / Education        │ detail pane
           │ Experience │ work roles                  │ (wrapped, scrollable)
           │ Projects   │ side projects               │
           │ Skills     │ skill groups                │

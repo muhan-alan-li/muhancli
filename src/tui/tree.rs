@@ -82,14 +82,20 @@ pub fn build_tree(p: &Portfolio) -> Node {
 }
 
 fn about_node(p: &Portfolio) -> Node {
-    let profile = Node::new("Profile", "Name, tagline, location").with_detail(vec![
+    let mut profile_detail = vec![
         DetailLine::Title(p.profile.name.clone()),
         DetailLine::Subtitle(p.profile.tagline.clone()),
         DetailLine::Blank,
         DetailLine::Text(format!("Location: {}", p.profile.location)),
         DetailLine::Text(format!("Phone: {}", p.profile.phone)),
         DetailLine::Text(format!("Email: {}", p.profile.email)),
-    ]);
+        DetailLine::Blank,
+        DetailLine::Heading("Links".to_string()),
+    ];
+    for link in &p.profile.links {
+        profile_detail.push(DetailLine::Bullet(format!("{}: {}", link.label, link.url)));
+    }
+    let profile = Node::new("Profile", "Bio, contact details, links").with_detail(profile_detail);
 
     let education = {
         let mut detail = vec![DetailLine::Heading("Education".to_string())];
@@ -111,15 +117,7 @@ fn about_node(p: &Portfolio) -> Node {
         .with_detail(detail)
     };
 
-    let links = {
-        let mut detail = vec![DetailLine::Heading("Links".to_string())];
-        for l in &p.profile.links {
-            detail.push(DetailLine::Bullet(format!("{}: {}", l.label, l.url)));
-        }
-        Node::new("Links", format!("{} profiles", p.profile.links.len())).with_detail(detail)
-    };
-
-    Node::new("About", "Bio, education, links")
+    Node::new("About", "Bio, contact, education")
         .with_detail(vec![
             DetailLine::Title("About".to_string()),
             DetailLine::Subtitle(p.profile.tagline.clone()),
@@ -130,7 +128,7 @@ fn about_node(p: &Portfolio) -> Node {
                     .to_string(),
             ),
         ])
-        .with_children(vec![profile, education, links])
+        .with_children(vec![profile, education])
 }
 
 fn experience_node(p: &Portfolio) -> Node {
@@ -246,6 +244,21 @@ mod tests {
         build_tree(&Portfolio::load())
     }
 
+    fn detail_text(node: &Node) -> String {
+        node.detail
+            .iter()
+            .filter_map(|line| match line {
+                DetailLine::Title(s)
+                | DetailLine::Subtitle(s)
+                | DetailLine::Heading(s)
+                | DetailLine::Text(s)
+                | DetailLine::Bullet(s) => Some(s.as_str()),
+                DetailLine::Blank => None,
+            })
+            .collect::<Vec<_>>()
+            .join(" ")
+    }
+
     #[test]
     fn root_has_all_resume_sections() {
         let root = tree();
@@ -261,20 +274,14 @@ mod tests {
 
         let about = &root.children[0];
         let labels: Vec<&str> = about.children.iter().map(|n| n.label.as_str()).collect();
-        assert_eq!(labels, ["Profile", "Education", "Links"]);
+        assert_eq!(labels, ["Profile", "Education"]);
 
-        let profile = &about.children[0];
-        let profile_detail = profile
-            .detail
-            .iter()
-            .filter_map(|l| match l {
-                DetailLine::Text(s) => Some(s.as_str()),
-                _ => None,
-            })
-            .collect::<Vec<_>>()
-            .join(" ");
-        assert!(profile_detail.contains(&p.profile.email));
-        assert!(profile_detail.contains(&p.profile.phone));
+        let profile = detail_text(&about.children[0]);
+        assert!(profile.contains(&p.profile.email));
+        assert!(profile.contains(&p.profile.phone));
+        for link in &p.profile.links {
+            assert!(profile.contains(&link.url), "missing link {}", link.label);
+        }
     }
 
     #[test]
